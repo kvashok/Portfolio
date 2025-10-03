@@ -80,6 +80,12 @@
         font-weight: 500;
         transition: color 0.3s;
       }
+      nav a.active {
+  color: #00bfff; /* highlight color */
+  font-weight: 700;
+  /* border-bottom: 2px solid #00bfff; */
+}
+
       nav a:hover {
         color: #00bfff;
       }
@@ -664,7 +670,7 @@
           </p>
           <div class="buttons">
             <a class="button" href="#projects">View Projects</a>
-            <a class="button" href="resume.pdf" download>Resume &#x1F4E5;</a>
+            <a class="button" href="/Assets/Resume/Resume.pdf" download>Resume &#x1F4E5;</a>
           </div>
         </div>
         <div class="hero-image">
@@ -952,25 +958,121 @@
 
               return isValid;
             }
+            const sections = document.querySelectorAll("section, .portfolio-content");
+const navLinks = document.querySelectorAll("nav a");
+
+function highlightMenu() {
+  let scrollY = window.scrollY;
+
+  sections.forEach((section) => {
+    const sectionTop = section.offsetTop - 100; // offset for fixed header
+    const sectionHeight = section.offsetHeight;
+    const sectionId = section.getAttribute("id");
+
+    if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+      navLinks.forEach((link) => {
+        link.classList.remove("active");
+        if (link.getAttribute("href") === `#${sectionId}`) {
+          link.classList.add("active");
+        }
+      });
+    }
+  });
+}
+
+window.addEventListener("scroll", highlightMenu);
+window.addEventListener("load", highlightMenu);
+
             </script>
         </div>
       </div>
     </section>
 
     <script>
-      /* --- Particle Background --- */
-      const CONFIG = {
-        baseCount: 100,
-        maxSize: 4,
-        minSize: 2,
-        speed: 1,
-        attractionStrength: 0.18,
-        cursorRadius: 160,
-        particleColor: "0,191,255",
-        trailsEnabled: true,
-        fpsCap: 60,
-        mode: "attract",
+      /* --- Particle backgrounds with presets per section --- */
+      const PRESETS = {
+        home: {
+          baseCount: 32,
+          maxSize: 140,
+          minSize: 40,
+          speed: 0.25,
+          attractionStrength: 0.28,
+          cursorRadius: 160,
+          particleColor: "0,191,255",
+          trailsEnabled: true,
+          fpsCap: 60,
+          mode: "repel",
+          type: "bubbles",
+        },
+        about: {
+          baseCount: 80,
+          maxSize: 3,
+          minSize: 1.5,
+          speed: 0.7,
+          attractionStrength: 0.14,
+          cursorRadius: 140,
+          particleColor: "255,255,255",
+          trailsEnabled: false,
+          fpsCap: 60,
+          mode: "attract",
+          type: "stars",
+        },
+        experience: {
+          baseCount: 45,
+          maxSize: 14,
+          minSize: 6,
+          speed: 0.18,
+          attractionStrength: 0.18,
+          cursorRadius: 160,
+          particleColor: "0,200,150",
+          trailsEnabled: true,
+          fpsCap: 60,
+          mode: "repel",
+          type: "soft-orbs",
+        },
+        projects: {
+          baseCount: 60,
+          maxSize: 3.5,
+          minSize: 1.2,
+          speed: 0.9,
+          attractionStrength: 0.22,
+          cursorRadius: 120,
+          particleColor: "200,120,255",
+          trailsEnabled: false,
+          fpsCap: 60,
+          mode: "attract",
+          type: "twinkle",
+        },
+        blog: {
+          baseCount: 18,
+          maxSize: 120,
+          minSize: 60,
+          speed: 0.12,
+          attractionStrength: 0.12,
+          cursorRadius: 180,
+          particleColor: "255,160,80",
+          trailsEnabled: true,
+          fpsCap: 60,
+          mode: "repel",
+          type: "bubbles",
+        },
+        contact: {
+          baseCount: 28,
+          maxSize: 90,
+          minSize: 30,
+          speed: 0.22,
+          attractionStrength: 0.2,
+          cursorRadius: 160,
+          particleColor: "0,191,255",
+          trailsEnabled: true,
+          fpsCap: 60,
+          mode: "repel",
+          type: "soft-orbs",
+        },
       };
+
+      // start with home preset
+      let CONFIG = Object.assign({}, PRESETS.home);
       const rand = (min, max) => Math.random() * (max - min) + min;
       const canvas = document.getElementById("particleCanvas"),
         ctx = canvas.getContext("2d");
@@ -983,6 +1085,7 @@
         lastFrameTime: 0,
         frameInterval: CONFIG.fpsCap > 0 ? 1000 / CONFIG.fpsCap : 0,
       };
+
       function resize() {
         DPR = Math.max(1, window.devicePixelRatio || 1);
         state.width = window.innerWidth;
@@ -994,20 +1097,38 @@
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
         initParticles();
       }
+
       function initParticles() {
         state.particles = [];
         for (let i = 0; i < CONFIG.baseCount; i++) {
+          const size = rand(CONFIG.minSize, CONFIG.maxSize);
           state.particles.push({
-            x: rand(0, state.width),
-            y: rand(0, state.height),
-            vx: rand(-0.6, 0.6) * CONFIG.speed,
-            vy: rand(-0.6, 0.6) * CONFIG.speed,
-            size: rand(CONFIG.minSize, CONFIG.maxSize),
-            baseSize: rand(CONFIG.minSize, CONFIG.maxSize),
-            alpha: rand(0.6, 1),
+            x: rand(-size, state.width + size),
+            y: rand(-size, state.height + size),
+            vx: rand(-0.2, 0.2) * CONFIG.speed,
+            vy: rand(-0.2, 0.2) * CONFIG.speed,
+            size,
+            baseSize: size,
+            // lower alpha so glow is softer and less likely to tint UI elements
+            alpha: rand(0.03, 0.12),
+            wobble: rand(0.002, 0.01),
           });
         }
       }
+
+      function drawBubble(p) {
+        // soft radial gradient for glow
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+        const c = CONFIG.particleColor;
+        g.addColorStop(0, `rgba(${c},${Math.min(0.9, p.alpha * 3)})`);
+        g.addColorStop(0.4, `rgba(${c},${p.alpha})`);
+        g.addColorStop(1, `rgba(10,12,22,0)`);
+        ctx.beginPath();
+        ctx.fillStyle = g;
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       function drawStar(x, y, r, color, alpha) {
         const spikes = 5;
         let rot = (Math.PI / 2) * 3,
@@ -1025,7 +1146,25 @@
         ctx.fillStyle = `rgba(${color},${alpha})`;
         ctx.fill();
       }
+
+      // generic draw dispatcher based on preset type
+      function drawForPreset(p) {
+        const t = CONFIG.type || 'bubbles';
+        if (t === 'bubbles' || t === 'soft-orbs') {
+          drawBubble(p);
+        } else if (t === 'stars' || t === 'twinkle') {
+          drawStar(p.x, p.y, p.size, CONFIG.particleColor, p.alpha);
+        } else {
+          drawBubble(p);
+        }
+      }
+
       function updateParticle(p) {
+        // gentle wobble
+        p.vx += Math.sin((p.x + performance.now() * p.wobble) * 0.001) * 0.0008;
+        p.vy += Math.cos((p.y + performance.now() * p.wobble) * 0.001) * 0.0008;
+
+        // mouse interaction: repel bubbles when close
         if (state.mouse.x !== null) {
           const dx = state.mouse.x - p.x,
             dy = state.mouse.y - p.y,
@@ -1034,36 +1173,48 @@
             const f =
               (1 - dist / CONFIG.cursorRadius) *
               CONFIG.attractionStrength *
-              (CONFIG.mode === "attract" ? 1 : -1);
-            p.vx += (dx / dist) * f;
-            p.vy += (dy / dist) * f;
+              (CONFIG.mode === "repel" ? -1 : 1);
+            if (dist > 0.1) {
+              p.vx += (dx / dist) * f;
+              p.vy += (dy / dist) * f;
+            }
           }
         }
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = state.width;
-        if (p.x > state.width) p.x = 0;
-        if (p.y < 0) p.y = state.height;
-        if (p.y > state.height) p.y = 0;
+
+        // update position
+        p.x += p.vx * (1 + p.size / 200);
+        p.y += p.vy * (1 + p.size / 200);
+
+        // wrap around for continuous flow
+        if (p.x < -p.size) p.x = state.width + p.size;
+        if (p.x > state.width + p.size) p.x = -p.size;
+        if (p.y < -p.size) p.y = state.height + p.size;
+        if (p.y > state.height + p.size) p.y = -p.size;
       }
+
       function frame(t) {
         if (!state.lastFrameTime) state.lastFrameTime = t;
         const dtMs = t - state.lastFrameTime;
         if (CONFIG.fpsCap === 0 || dtMs >= state.frameInterval) {
+          // trails: paint a semi-opaque rect to create soft persistence
           if (CONFIG.trailsEnabled) {
-            ctx.fillStyle = "rgba(10,12,22,0.2)";
+            ctx.fillStyle = "rgba(10,12,22,0.28)";
             ctx.fillRect(0, 0, state.width, state.height);
           } else {
             ctx.clearRect(0, 0, state.width, state.height);
           }
+
+          // draw normally (no additive blending) so canvas glow doesn't tint DOM text
           state.particles.forEach((p) => {
             updateParticle(p);
-            drawStar(p.x, p.y, p.size, CONFIG.particleColor, p.alpha);
+            drawForPreset(p);
           });
+
           state.lastFrameTime = t;
         }
         requestAnimationFrame(frame);
       }
+
       window.addEventListener("mousemove", (e) => {
         state.mouse.x = e.clientX;
         state.mouse.y = e.clientY;
@@ -1075,6 +1226,35 @@
       window.addEventListener("resize", resize);
       resize();
       requestAnimationFrame(frame);
+
+      // --- Section-aware preset switching ---
+      function setPreset(name) {
+        if (!PRESETS[name]) return;
+        // shallow copy preset values into CONFIG
+        CONFIG = Object.assign({}, PRESETS[name]);
+        // reinitialize frame timing and particles
+        state.frameInterval = CONFIG.fpsCap > 0 ? 1000 / CONFIG.fpsCap : 0;
+        initParticles();
+      }
+
+      // Observe sections and switch preset when they enter center of view
+      const sectionIds = ['home','about','experience','projects','blog','contact'];
+      const observerOptions = { root: null, rootMargin: '0px', threshold: 0.45 };
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            if (sectionIds.includes(id)) {
+              setPreset(id);
+            }
+          }
+        });
+      }, observerOptions);
+
+      sectionIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) sectionObserver.observe(el);
+      });
 
       /* --- Mobile menu --- */
       const menuToggle = document.getElementById("menuToggle"),
