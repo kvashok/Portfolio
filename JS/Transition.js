@@ -316,11 +316,22 @@
       if (contactEl) contactObserver.observe(contactEl);
 
       /* --- Mobile menu --- */
-      const menuToggle = document.getElementById("menuToggle"),
-        menuList = document.getElementById("menuList");
-      menuToggle.addEventListener("click", () => {
-        menuList.classList.toggle("open");
-      });
+      const menuToggle = document.getElementById("menuToggle");
+const menuList = document.getElementById("menuList");
+
+menuToggle.addEventListener("click", () => {
+  menuToggle.classList.toggle("active");
+  menuList.classList.toggle("open");
+});
+
+// Close menu when link clicked
+document.querySelectorAll("nav a").forEach((link) => {
+  link.addEventListener("click", () => {
+    menuToggle.classList.remove("active");
+    menuList.classList.remove("open");
+  });
+});
+
 
       /* --- Smooth scrolling --- */
       document.querySelectorAll('nav a[href^="#"]').forEach((anchor) => {
