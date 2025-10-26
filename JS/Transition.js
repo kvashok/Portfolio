@@ -334,7 +334,7 @@
 
       /* --- Typing animation --- */
       const roles = [
-        "Senior Frontend Developer",
+        "Frontend Developer",
         "Full Stack Developer",
         "UI/UX Designer",
       ];
