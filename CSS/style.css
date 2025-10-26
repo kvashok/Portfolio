@@ -50,6 +50,112 @@
   transition: all 0.3s ease;
 }
 
+/* Theme toggle button in header (sun / moon) */
+.theme-toggle {
+  margin-left: auto; /* push to right side of header */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.theme-toggle:focus { outline: 2px solid rgba(0,191,255,0.25); }
+.theme-toggle .icon { width: 20px; height: 20px; display: block; }
+
+/* Show moon by default (dark theme) and sun when data-theme="light" */
+.theme-toggle[data-theme="dark"] .moon { display: block; }
+.theme-toggle[data-theme="dark"] .sun { display: none; }
+.theme-toggle[data-theme="light"] .moon { display: none; }
+.theme-toggle[data-theme="light"] .sun { display: block; }
+/* ensure sun icon renders in black on light theme */
+.theme-toggle[data-theme="light"] .sun { color: #000; }
+
+/* Light-theme overrides: make sections white and text black */
+body.light-theme {
+  background: #ffffff;
+  color: #000000;
+}
+body.light-theme header {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+body.light-theme nav a { color: rgba(0,0,0,0.85); }
+
+/* Ensure main sections, cards and containers use white background and black text */
+body.light-theme section,
+body.light-theme .portfolio-content,
+body.light-theme .project-card,
+body.light-theme .edu-card,
+body.light-theme .contact-left,
+body.light-theme .contact-right,
+body.light-theme .coming-soon-container {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: none;
+}
+
+/* Links and smaller text elements */
+body.light-theme a,
+body.light-theme .sub-title,
+body.light-theme p,
+body.light-theme .project-desc,
+body.light-theme .about-text,
+body.light-theme .achievements li {
+  color: #000000;
+}
+
+/* Make modal backdrop slightly darker on white pages for contrast */
+body.light-theme .img-modal { background: rgba(4,6,12,0.6); }
+
+/* Override ID-specific gradients / animated pseudo-elements that were higher-specificity */
+body.light-theme #about.portfolio-content,
+body.light-theme #projects.portfolio-content,
+body.light-theme #contact.portfolio-content {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Hide decorative/animated pseudo background used for projects when in light theme */
+body.light-theme #projects.portfolio-content.animated-projects::before {
+  display: none !important;
+}
+
+/* Some sections set backgrounds on pseudo elements — force neutral look in light theme */
+body.light-theme #projects.portfolio-content.animated-projects::after,
+body.light-theme #contact.portfolio-content.animated-contact::before,
+body.light-theme #contact.portfolio-content.animated-contact::after {
+  display: none !important;
+}
+
+/* Education card: force text to black in light theme (overrides earlier white rules) */
+body.light-theme .edu-card,
+body.light-theme .edu-card h3,
+body.light-theme .edu-card p,
+body.light-theme .edu-card .edu-icon,
+body.light-theme .edu-card .edu-score,
+body.light-theme .flip-front,
+body.light-theme .flip-back {
+  color: #000000 !important;
+}
+
+/* Ensure flip faces use white background for consistency */
+body.light-theme .flip-front,
+body.light-theme .flip-back {
+  background: #ffffff !important;
+}
+
+/* Make only the education card border visible in light theme (keep home hero .card untouched) */
+body.light-theme .edu-card {
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+
       header h2 {
   color: #fff;
   margin: 0;
@@ -80,17 +186,22 @@
       nav a::after {
   content: '';
   position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #00bfff;
-  transition: width 0.4s ease;
+  left: 0;
+  right: 0;
+  bottom: -2px; /* sit close under text */
+  height: 2px;   /* thin underline */
+  border-radius: 2px;
+  background: #00bfff; /* solid accent color */
+  opacity: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: opacity 160ms ease, transform 160ms ease;
 }
 
       nav a.active::after {
-  width: 100%;
+  /* keep underline visible when active */
+  opacity: 1.0;
+  transform: scaleX(1);
 }
 
 nav a.active {
@@ -100,6 +211,34 @@ nav a.active {
 
       nav a:hover {
   color: #00bfff;
+}
+
+/* show a normal solid underline on hover */
+nav a:hover::after {
+  opacity: 1.0;
+  transform: scaleX(1);
+}
+
+/* Per-letter text wave for nav links */
+nav a .wave-wrapper { display:inline-block; }
+nav a .wave-letter {
+  display:inline-block;
+  transform: translateY(0);
+  will-change: transform;
+}
+nav a:hover .wave-letter {
+  animation-name: textWave;
+  animation-duration: 900ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+  animation-delay: calc(var(--i) * 0.06s);
+}
+@keyframes textWave {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+  60% { transform: translateY(0); }
+  100% { transform: translateY(0); }
 }
 
       .menu-toggle {
@@ -200,6 +339,7 @@ nav a.active {
         text-decoration: none;
         font-weight: 600;
         transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+        border: 1px solid rgba(255,255,255,0.16); /* visible border for contrast */
       }
       a.button:hover {
         background: rgba(255, 255, 255, 0.25);
@@ -454,6 +594,100 @@ nav a.active {
         100% { transform: translateX(-20%) rotate(0.001deg); }
       }
 
+      /* Projects grid: featured vertical cards similar to the design */
+      /* Projects grid: two-columns on desktop, single column on small screens */
+      .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 32px;
+        align-items: start;
+        max-width: 1200px;
+        margin: 20px auto 0;
+        padding: 0 12px;
+      }
+
+      .project-card {
+        width: 100%;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(0,191,255,0.06);
+        border-radius: 12px;
+        overflow: hidden;
+        box-sizing: border-box;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .project-card:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(0,0,0,0.45); }
+
+      .project-media { width: 100%; border-radius: 8px; overflow: hidden; }
+      .project-media img { width: 100%; height: 220px; object-fit: cover; display: block; }
+
+      .project-body { width: 100%; margin-top: 14px; }
+      .project-title { margin: 0 0 8px; font-size: 1.4rem; font-weight: 800; }
+      .project-title .accent { color: #00bfff; }
+
+      .project-desc { margin: 0 0 12px; color: rgba(255,255,255,0.9); font-size: 1rem; line-height: 1.5; }
+
+      .project-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+      .tag-pill { padding:6px 12px; border-radius:18px; border:1px solid rgba(0,191,255,0.12); color:#00bfff; background:transparent; font-weight:700; font-size:0.9rem }
+
+      /* Tech stack icons (used instead of text pills) */
+      .tech-icon {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      .project-statuses { display:flex; gap:10px; margin-bottom:12px; }
+      .status-pill { padding:8px 14px; border-radius:18px; font-weight:700; font-size:0.9rem }
+      .status-pill.filled { background:#00bfff; color:#fff; }
+      .status-pill.outlined { background:transparent; color:#00bfff; border:2px solid rgba(0,191,255,0.12); }
+
+      .project-actions { display:flex; gap:12px; align-items:center; margin-top:6px; }
+  .btn { padding:10px 16px; border-radius:24px; text-decoration:none; font-weight:800; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem; border: 1px solid transparent; }
+  .btn.primary { background:linear-gradient(90deg,#0072ff,#00c6ff); color:#fff; border: 1px solid rgba(255,255,255,0.16); }
+  .btn.ghost { background:rgba(255,255,255,0.04); color:#cfefff; border:1px solid rgba(255,255,255,0.14); }
+      .btn.disabled, .btn[aria-disabled="true"] { opacity:0.6; pointer-events:none; }
+
+      @media (max-width: 900px) {
+        .projects-grid { grid-template-columns: 1fr; }
+        .project-media img { height: 260px; }
+        .project-title { font-size: 1.25rem; }
+        .project-desc { font-size: 0.98rem; }
+      }
+
+      @media (max-width: 420px) {
+        .project-media img { height: 200px; }
+        .project-title { font-size: 1.1rem; }
+        .btn { padding:8px 12px; font-size:0.9rem }
+      }
+
+      /* Light-theme button border overrides for good contrast */
+      body.light-theme a.button { border-color: rgba(0,0,0,0.12); color: #000000; background: rgba(255,255,255,0.98); }
+      body.light-theme .btn.primary { border-color: rgba(0,0,0,0.12); }
+      body.light-theme .btn.ghost { border-color: rgba(0,0,0,0.12); color: #000000; background: rgba(255,255,255,0.98); }
+
+      /* Light-theme: make social follow buttons white for contrast */
+      body.light-theme .social-btn {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid rgba(0,0,0,0.10) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      }
+      body.light-theme .social-btn:hover {
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06) !important;
+      }
+      /* Keep social icons in their original brand colors in light theme */
+      body.light-theme .social-icon.github { fill: #181717 !important; }
+      body.light-theme .social-icon.linkedin { fill: #0077B5 !important; }
+      body.light-theme .social-icon.facebook { fill: #1877F2 !important; }
+
       /* Contact section animated radial ripples */
       #contact.portfolio-content {
         position: relative;
@@ -509,14 +743,80 @@ nav a.active {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(0, 191, 255, 0.2);
         border-radius: 12px;
-        padding: 24px;
+        /* remove outer padding so absolutely-positioned faces can fill the card
+           keep padding inside .flip-front for content spacing */
+        padding: 0;
         width: 280px;
+        min-height: 280px; /* stable height so card doesn't collapse */
+        box-sizing: border-box;
         text-align: center;
         transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
       }
       .edu-card:hover {
         transform: translateY(-5px) scale(1.03);
         box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3);
+      }
+      /* Flip card wrapper for About section cards */
+      .flip-card {
+        width: 100%;
+        height: 100%;
+        display: block;
+        perspective: 1200px;
+        border-radius: 12px;
+        outline: none; /* for keyboard focus, we handle styles separately */
+      }
+
+      .flip-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        transition: transform 0.8s cubic-bezier(.2,.9,.3,1);
+        border-radius: 12px;
+      }
+
+      /* flip on hover and when a `flipped` class is present (for JS toggling) */
+      .flip-card:hover .flip-inner,
+      .flip-card.flipped .flip-inner,
+      .flip-card:focus .flip-inner {
+        transform: rotateY(180deg);
+      }
+
+      .flip-front,
+      .flip-back {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+        background: rgba(255,255,255,0.02);
+      }
+
+      .flip-front {
+        background: transparent;
+      }
+
+      .flip-back {
+        transform: rotateY(180deg);
+        padding: 0;
+      }
+
+      .flip-back img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
       }
       .edu-icon {
         font-size: 2rem;
@@ -547,6 +847,7 @@ nav a.active {
         }
         .edu-card {
           width: 90%;
+          min-height: 220px;
         }
       }
 
@@ -620,6 +921,19 @@ nav a.active {
         opacity: 1;
         transform: translateY(0);
       }
+
+/* Light-theme: make the experience timeline card white with black text */
+body.light-theme .timeline-content {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+body.light-theme .timeline-content .achievements li { color: #000000 !important; }
+body.light-theme .timeline-item::before {
+  /* keep accent dot but adjust the inner border to blend with white background */
+  border: 4px solid #ffffff !important;
+}
       .achievements {
         list-style: none;
         padding: 0;
@@ -675,6 +989,25 @@ nav a.active {
         color: rgba(255, 255, 255, 0.9);
         font-size: 1.2rem;
         margin-bottom: 30px;
+      }
+      /* Light-theme: force blog coming-soon text to black for contrast */
+      body.light-theme .coming-soon-container h2 {
+        color: #000000 !important;
+      }
+      body.light-theme .coming-soon-container p {
+        color: #000000 !important;
+      }
+      /* Light-theme: make the blog coming-soon container border visible */
+      body.light-theme .coming-soon-container {
+        border: 1px solid rgba(0,0,0,0.12) !important;
+        /* subtle neutral shadow + faint site-accent glow */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 18px rgba(0,191,255,0.10) !important;
+        transition: box-shadow 240ms ease, transform 200ms ease;
+        background: #ffffff !important;
+      }
+      body.light-theme .coming-soon-container:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 32px rgba(0,191,255,0.18) !important;
+        transform: translateY(-4px);
       }
       @keyframes pulse {
         0% {
@@ -774,6 +1107,33 @@ nav a.active {
         box-shadow: 0 6px 18px rgba(0,191,255,0.08);
       }
 
+/* Light-theme: make contact cards and form fields visible */
+body.light-theme .contact-left,
+body.light-theme .contact-right {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04) !important;
+}
+body.light-theme .contact-left h3,
+body.light-theme .contact-right h3,
+body.light-theme .contact-item,
+body.light-theme .contact-list a {
+  color: #000000 !important;
+}
+
+body.light-theme .contact-form input,
+body.light-theme .contact-form textarea {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  color: #000000 !important;
+}
+body.light-theme .contact-form input::placeholder,
+body.light-theme .contact-form textarea::placeholder {
+  color: rgba(0,0,0,0.45) !important;
+}
+body.light-theme .contact-form label { color: #000000 !important; }
+
       .form-actions { display:flex; justify-content:flex-start; align-items:center; margin-top:8px }
       .primary {
         background: linear-gradient(90deg,#00c6ff,#0072ff);
@@ -812,5 +1172,60 @@ nav a.active {
 
 header {
   animation: headerGlow 3s ease-in-out infinite;
+}
+
+/* --- Image modal (lightbox) --- */
+.img-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 6, 12, 0.88);
+  z-index: 11000;
+  padding: 24px;
+}
+.img-modal[aria-hidden="false"] {
+  display: flex;
+}
+.img-modal-content {
+  position: relative;
+  max-width: 92vw;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.img-modal-content img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 4px 14px rgba(0,191,255,0.06);
+  display: block;
+}
+.img-modal-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background: #111;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.06);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 36px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 600px) {
+  .img-modal-content { max-width: 98vw; max-height: 90vh; }
+  .img-modal-close { width:36px; height:36px; top:-10px; right:-10px; }
 }
 

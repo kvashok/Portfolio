@@ -419,10 +419,11 @@
       timelineItems.forEach((item) => observer.observe(item));
 
       /* --- Countdown Timer --- */
+      // Set blog countdown target to 15 days from the moment the page loads
+      const blogCountdownTarget = Date.now() + 15 * 24 * 60 * 60 * 1000;
       function updateCountdown() {
-        const now = new Date().getTime();
-        const futureDate = new Date('2025-10-17T00:00:00').getTime(); // Fixed date: October 17, 2025
-        const distance = futureDate - now;
+        const now = Date.now();
+        const distance = blogCountdownTarget - now;
 
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
